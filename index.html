@@ -273,6 +273,38 @@
                   </div>
                 </div>
               </div>
+
+              <div
+                class="campo campo-completo bloque-conversion-medica oculto"
+                id="bloqueCoberturaEuro"
+              >
+                <h3 class="subseccion-titulo">
+                  Conversión de cobertura médica (USD → EUR)
+                </h3>
+
+                <div class="grid-formulario">
+                  <div class="campo">
+                    <label for="cotizacionUsdEur">
+                      Valor diario en EUR equivalente a 9 USD
+                    </label>
+                    <input
+                      type="number"
+                      id="cotizacionUsdEur"
+                      name="cotizacionUsdEur"
+                      min="0"
+                      step="0.0001"
+                      placeholder="Ej: 7.74"
+                    />
+                  </div>
+
+                  <div class="campo campo-completo">
+                    <small class="ayuda">
+                      Ingresá directamente el valor diario ya convertido a EUR
+                      correspondiente a los 9 USD de cobertura médica.
+                    </small>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -352,6 +384,14 @@
         </div>
       </div>
     </template>
+
+    <div id="burbujaConversor" title="Abrir conversor de Aduana">
+      <img
+        src="./img/logoaduana.jpg"
+        alt="Conversor de monedas"
+        class="burbuja-logo"
+      />
+    </div>
 
     <script src="./js/calculadora.js"></script>
   </body>

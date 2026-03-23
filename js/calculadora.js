@@ -57,7 +57,7 @@ const TARIFAS = {
   },
 };
 
-const COBERTURA_MEDICA_DIARIA = 9;
+const COBERTURA_MEDICA_DIARIA_USD = 9;
 
 const ALIAS_PAISES = {
   eeuu: "estados unidos",
@@ -299,11 +299,13 @@ const bloquePasajes = document.getElementById("bloquePasajes");
 const bloquePasajesDetenidos = document.getElementById(
   "bloquePasajesDetenidos",
 );
+const bloqueCoberturaEuro = document.getElementById("bloqueCoberturaEuro");
 const montoPasajesArsInput = document.getElementById("montoPasajesArs");
 const montoPasajesDetenidosArsInput = document.getElementById(
   "montoPasajesDetenidosArs",
 );
 const cotizacionMonedaInput = document.getElementById("cotizacionMoneda");
+const cotizacionUsdEurInput = document.getElementById("cotizacionUsdEur");
 const textoMonedaCotizacion = document.getElementById("textoMonedaCotizacion");
 const tituloPasajesDetenidos = document.getElementById(
   "tituloPasajesDetenidos",
@@ -316,11 +318,13 @@ document.addEventListener("DOMContentLoaded", () => {
   detectarZonaYMoneda();
   actualizarBloquePasajes();
   actualizarBloquePasajesDetenidos();
+  actualizarBloqueCoberturaEuro();
 });
 
 paisInput.addEventListener("input", () => {
   detectarZonaYMoneda();
   actualizarTextoCotizacion();
+  actualizarBloqueCoberturaEuro();
 });
 
 cantidadFuncionariosSelect.addEventListener("change", () => {
@@ -335,6 +339,7 @@ document.querySelectorAll('input[name="gastosErogar"]').forEach((checkbox) => {
   checkbox.addEventListener("change", () => {
     actualizarBloquePasajes();
     actualizarBloquePasajesDetenidos();
+    actualizarBloqueCoberturaEuro();
   });
 });
 
@@ -350,6 +355,7 @@ btnLimpiar.addEventListener("click", () => {
   sincronizarCantidadFuncionarios(1);
   actualizarBloquePasajes();
   actualizarBloquePasajesDetenidos();
+  actualizarBloqueCoberturaEuro();
 });
 
 formulario.addEventListener("submit", (event) => {
@@ -455,6 +461,12 @@ function obtenerTextoDetenidos(cantidad) {
   return cantidad === 1 ? "detenido" : "detenidos";
 }
 
+function obtenerGastosSeleccionados() {
+  return Array.from(
+    document.querySelectorAll('input[name="gastosErogar"]:checked'),
+  ).map((checkbox) => checkbox.value);
+}
+
 function actualizarBloquePasajesDetenidos() {
   const mostrarPasajes = obtenerGastosSeleccionados().includes("pasajes");
   const cantidadDetenidos = obtenerCantidadDetenidos();
@@ -472,6 +484,29 @@ function actualizarBloquePasajesDetenidos() {
 
   if (!mostrar) {
     montoPasajesDetenidosArsInput.value = "";
+  }
+}
+
+function actualizarBloquePasajes() {
+  const mostrar = obtenerGastosSeleccionados().includes("pasajes");
+  bloquePasajes.classList.toggle("oculto", !mostrar);
+
+  if (!mostrar) {
+    montoPasajesArsInput.value = "";
+    cotizacionMonedaInput.value = "";
+  }
+}
+
+function actualizarBloqueCoberturaEuro() {
+  const gastos = obtenerGastosSeleccionados();
+  const zonaInfo = detectarZonaYMoneda();
+  const mostrar =
+    gastos.includes("coberturaMedica") && zonaInfo && zonaInfo.zona === 3;
+
+  bloqueCoberturaEuro.classList.toggle("oculto", !mostrar);
+
+  if (!mostrar) {
+    cotizacionUsdEurInput.value = "";
   }
 }
 
@@ -530,22 +565,6 @@ function calcularNochesAlojamiento(fechaInicioStr, fechaFinStr, horaRegreso) {
   }
 
   return noches;
-}
-
-function obtenerGastosSeleccionados() {
-  return Array.from(
-    document.querySelectorAll('input[name="gastosErogar"]:checked'),
-  ).map((checkbox) => checkbox.value);
-}
-
-function actualizarBloquePasajes() {
-  const mostrar = obtenerGastosSeleccionados().includes("pasajes");
-  bloquePasajes.classList.toggle("oculto", !mostrar);
-
-  if (!mostrar) {
-    montoPasajesArsInput.value = "";
-    cotizacionMonedaInput.value = "";
-  }
 }
 
 function validarFormulario(zonaInfo) {
@@ -607,6 +626,14 @@ function validarFormulario(zonaInfo) {
     }
   }
 
+  if (gastos.includes("coberturaMedica") && zonaInfo.zona === 3) {
+    const valorDiarioCoberturaEur = Number(cotizacionUsdEurInput.value);
+
+    if (!valorDiarioCoberturaEur || valorDiarioCoberturaEur <= 0) {
+      return "Tenés que ingresar el valor diario en EUR equivalente a los 9 USD de cobertura médica.";
+    }
+  }
+
   for (const select of selectsJerarquia) {
     if (!select.value) {
       return "Todos los funcionarios deben tener jerarquía seleccionada.";
@@ -630,6 +657,23 @@ function calcularMontoConvertidoDesdeArs(montoArs, cotizacionMoneda) {
   }
 
   return montoArs / cotizacionMoneda;
+}
+
+function obtenerCoberturaDiaria(zonaInfo) {
+  if (zonaInfo.zona === 3) {
+    return Number(cotizacionUsdEurInput.value) || 0;
+  }
+
+  return COBERTURA_MEDICA_DIARIA_USD;
+}
+
+function obtenerDetalleCoberturaDiaria(zonaInfo) {
+  if (zonaInfo.zona === 3) {
+    const valorDiarioCoberturaEur = Number(cotizacionUsdEurInput.value) || 0;
+    return `${valorDiarioCoberturaEur.toFixed(2)} EUR`;
+  }
+
+  return `9 USD`;
 }
 
 function calcularComision() {
@@ -685,6 +729,9 @@ function calcularComision() {
         )
       : 0;
 
+  const coberturaDiaria = obtenerCoberturaDiaria(zonaInfo);
+  const detalleCoberturaDiaria = obtenerDetalleCoberturaDiaria(zonaInfo);
+
   let totalPasajesFuncionarios = 0;
   let totalPasajesDetenidos = 0;
   let totalViaticos = 0;
@@ -704,7 +751,7 @@ function calcularComision() {
       ? nochesAlojamiento * tarifas.alojamiento
       : 0;
     const montoCobertura = gastos.includes("coberturaMedica")
-      ? diasCobertura * COBERTURA_MEDICA_DIARIA
+      ? diasCobertura * coberturaDiaria
       : 0;
 
     totalViaticos += montoViaticos;
@@ -731,7 +778,7 @@ function calcularComision() {
         }</p>
         <p><strong>Cobertura médica:</strong> ${
           gastos.includes("coberturaMedica")
-            ? `${diasCobertura} x ${COBERTURA_MEDICA_DIARIA} = ${formatearMonto(montoCobertura, zonaInfo.moneda)}`
+            ? `${diasCobertura} x ${detalleCoberturaDiaria} = ${formatearMonto(montoCobertura, zonaInfo.moneda)}`
             : "No seleccionado"
         }</p>
         <p><strong>Pasajes:</strong> ${
@@ -795,8 +842,77 @@ function calcularComision() {
       }</p>
       <p><strong>Total viáticos:</strong> ${formatearMonto(totalViaticos, zonaInfo.moneda)}</p>
       <p><strong>Total alojamiento:</strong> ${formatearMonto(totalAlojamiento, zonaInfo.moneda)}</p>
-      <p><strong>Total cobertura médica:</strong> ${formatearMonto(totalCoberturaMedica, zonaInfo.moneda)}</p>
+      <p><strong>Total cobertura médica:</strong> ${
+        gastos.includes("coberturaMedica")
+          ? `${formatearMonto(totalCoberturaMedica, zonaInfo.moneda)} <br><small>Base diaria: ${detalleCoberturaDiaria}</small>`
+          : formatearMonto(totalCoberturaMedica, zonaInfo.moneda)
+      }</p>
       <p><strong>TOTAL GENERAL:</strong> ${formatearMonto(totalGeneral, zonaInfo.moneda)}</p>
     </div>
   `;
 }
+
+/* =========================
+   BURBUJA ARRASTRABLE
+========================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const burbuja = document.getElementById("burbujaConversor");
+
+  if (!burbuja) return;
+
+  let isDragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+  let moved = false;
+
+  // Cargar posición guardada
+  const savedX = localStorage.getItem("burbujaX");
+  const savedY = localStorage.getItem("burbujaY");
+
+  if (savedX && savedY) {
+    burbuja.style.left = savedX + "px";
+    burbuja.style.top = savedY + "px";
+    burbuja.style.transform = "none";
+  }
+
+  burbuja.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    moved = false;
+
+    const rect = burbuja.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+
+    moved = true;
+
+    const x = e.clientX - offsetX;
+    const y = e.clientY - offsetY;
+
+    burbuja.style.left = `${x}px`;
+    burbuja.style.top = `${y}px`;
+    burbuja.style.transform = "none";
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (!isDragging) return;
+
+    isDragging = false;
+
+    // Guardar posición
+    localStorage.setItem("burbujaX", burbuja.offsetLeft);
+    localStorage.setItem("burbujaY", burbuja.offsetTop);
+
+    // Si no se movió → es click
+    if (!moved) {
+      window.open(
+        "https://www.aduanaargentina.com/conversor-de-monedas/",
+        "_blank",
+      );
+    }
+  });
+});
