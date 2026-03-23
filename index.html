@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculadora 888</title>
+    <link rel="stylesheet" href="./css/calculadora.css" />
+  </head>
+  <body>
+    <main class="contenedor-principal">
+      <section class="tarjeta">
+        <h1>Calculadora 888/24</h1>
+        <p class="subtitulo">
+          Cálculo de viáticos, alojamiento, cobertura médica y pasajes por
+          jerarquía.
+        </p>
+
+        <form id="formularioComision" novalidate>
+          <div class="bloque">
+            <h2>Datos generales</h2>
+
+            <div class="grid-formulario">
+              <div class="campo">
+                <label for="pais">País</label>
+                <input
+                  type="text"
+                  id="pais"
+                  name="pais"
+                  placeholder="Ej: Brasil, Bolivia, Estados Unidos"
+                  autocomplete="off"
+                  required
+                />
+                <small class="ayuda">
+                  Podés escribir el nombre común del país. La zona se detecta
+                  automáticamente.
+                </small>
+              </div>
+
+              <div class="campo">
+                <label for="zonaDetectada">Zona detectada</label>
+                <input
+                  type="text"
+                  id="zonaDetectada"
+                  name="zonaDetectada"
+                  readonly
+                />
+              </div>
+
+              <div class="campo">
+                <label for="monedaDetectada">Moneda</label>
+                <input
+                  type="text"
+                  id="monedaDetectada"
+                  name="monedaDetectada"
+                  readonly
+                />
+              </div>
+
+              <div class="campo">
+                <label for="fechaInicio">Fecha de inicio</label>
+                <input
+                  type="date"
+                  id="fechaInicio"
+                  name="fechaInicio"
+                  required
+                />
+              </div>
+
+              <div class="campo">
+                <label for="fechaRegreso">Fecha de regreso</label>
+                <input
+                  type="date"
+                  id="fechaRegreso"
+                  name="fechaRegreso"
+                  required
+                />
+              </div>
+
+              <div class="campo">
+                <label for="horaSalida">Hora de salida</label>
+                <input type="time" id="horaSalida" name="horaSalida" required />
+              </div>
+
+              <div class="campo">
+                <label for="horaRegreso">Hora de regreso</label>
+                <input
+                  type="time"
+                  id="horaRegreso"
+                  name="horaRegreso"
+                  required
+                />
+              </div>
+
+              <div class="campo">
+                <label for="cantidadFuncionarios"
+                  >Cantidad de funcionarios</label
+                >
+                <select
+                  id="cantidadFuncionarios"
+                  name="cantidadFuncionarios"
+                  required
+                >
+                  <option value="1">1 funcionario</option>
+                  <option value="2">2 funcionarios</option>
+                  <option value="3">3 funcionarios</option>
+                  <option value="4">4 funcionarios</option>
+                  <option value="5">5 funcionarios</option>
+                  <option value="6">6 funcionarios</option>
+                  <option value="7">7 funcionarios</option>
+                  <option value="8">8 funcionarios</option>
+                  <option value="9">9 funcionarios</option>
+                  <option value="10">10 funcionarios</option>
+                </select>
+              </div>
+
+              <div class="campo campo-completo">
+                <label>Gastos a erogar</label>
+
+                <details class="selector-gastos">
+                  <summary>Seleccionar gastos</summary>
+
+                  <div class="opciones-gastos">
+                    <label class="opcion-gasto">
+                      <input
+                        type="checkbox"
+                        name="gastosErogar"
+                        value="pasajes"
+                      />
+                      <span>Pasajes</span>
+                    </label>
+
+                    <label class="opcion-gasto">
+                      <input
+                        type="checkbox"
+                        name="gastosErogar"
+                        value="viaticos"
+                      />
+                      <span>Viáticos</span>
+                    </label>
+
+                    <label class="opcion-gasto">
+                      <input
+                        type="checkbox"
+                        name="gastosErogar"
+                        value="alojamiento"
+                      />
+                      <span>Alojamiento</span>
+                    </label>
+
+                    <label class="opcion-gasto">
+                      <input
+                        type="checkbox"
+                        name="gastosErogar"
+                        value="coberturaMedica"
+                      />
+                      <span>Cobertura médica</span>
+                    </label>
+                  </div>
+                </details>
+
+                <small class="ayuda">
+                  Podés seleccionar uno, dos, tres o los cuatro gastos con clic.
+                </small>
+              </div>
+
+              <div
+                class="campo campo-completo bloque-pasajes oculto"
+                id="bloquePasajes"
+              >
+                <h3 class="subseccion-titulo">Pasajes aéreos</h3>
+
+                <div class="grid-formulario">
+                  <div class="campo">
+                    <label for="montoPasajesArs"
+                      >Monto total de pasajes (ARS)</label
+                    >
+                    <input
+                      type="number"
+                      id="montoPasajesArs"
+                      name="montoPasajesArs"
+                      min="0"
+                      step="0.01"
+                      placeholder="Ej: 2500000"
+                    />
+                  </div>
+
+                  <div class="campo">
+                    <label for="cotizacionMoneda">
+                      Cotización ARS por
+                      <span id="textoMonedaCotizacion">USD/EUR</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="cotizacionMoneda"
+                      name="cotizacionMoneda"
+                      min="0"
+                      step="0.0001"
+                      placeholder="Ej: 1200"
+                    />
+                  </div>
+
+                  <div class="campo campo-completo">
+                    <a
+                      class="link-conversor"
+                      href="https://www.aduanaargentina.com/conversor-de-monedas/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Abrir conversor de monedas de Aduana
+                    </a>
+                    <small class="ayuda">
+                      Los pasajes se cargan siempre en pesos argentinos y la
+                      calculadora los convierte a la moneda del destino.
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bloque">
+            <h2>Funcionarios</h2>
+            <div id="contenedorFuncionarios"></div>
+          </div>
+
+          <div class="acciones-principales">
+            <button type="submit" class="btn-principal">Calcular</button>
+            <button type="button" id="btnLimpiar" class="btn-secundario">
+              Limpiar
+            </button>
+          </div>
+        </form>
+
+        <section id="resultado" class="resultado oculto"></section>
+      </section>
+    </main>
+
+    <template id="templateFuncionario">
+      <div class="tarjeta-funcionario">
+        <h3 class="titulo-funcionario"></h3>
+        <div class="grid-formulario">
+          <div class="campo">
+            <label>Jerarquía</label>
+            <select class="select-jerarquia" required>
+              <option value="">Seleccionar jerarquía</option>
+              <option value="Jefe de Policía">Jefe de Policía (J1)</option>
+              <option value="Subjefe de Policía">
+                Subjefe de Policía (J2)
+              </option>
+              <option value="Comisario General">Comisario General</option>
+              <option value="Comisario Mayor">Comisario Mayor</option>
+              <option value="Comisario Inspector">Comisario Inspector</option>
+              <option value="Comisario">Comisario</option>
+              <option value="Subcomisario">Subcomisario</option>
+              <option value="Principal">Principal</option>
+              <option value="Inspector">Inspector</option>
+              <option value="Subinspector">Subinspector</option>
+              <option value="Ayudante">Ayudante</option>
+              <option value="Suboficial Mayor">Suboficial Mayor</option>
+              <option value="Suboficial Auxiliar">Suboficial Auxiliar</option>
+              <option value="Suboficial Escribiente">
+                Suboficial Escribiente
+              </option>
+              <option value="Sargento 1ro">Sargento 1ro</option>
+              <option value="Sargento">Sargento</option>
+              <option value="Cabo 1ro">Cabo 1ro</option>
+              <option value="Cabo">Cabo</option>
+              <option value="Agente">Agente</option>
+              <option value="Auxiliar Superior 1°">Auxiliar Superior 1°</option>
+              <option value="Auxiliar Superior 2°">Auxiliar Superior 2°</option>
+              <option value="Auxiliar Superior 3°">Auxiliar Superior 3°</option>
+              <option value="Auxiliar Superior 4°">Auxiliar Superior 4°</option>
+              <option value="Auxiliar Superior 5°">Auxiliar Superior 5°</option>
+              <option value="Auxiliar Superior 6°">Auxiliar Superior 6°</option>
+              <option value="Auxiliar de 1°">Auxiliar de 1°</option>
+              <option value="Auxiliar de 2°">Auxiliar de 2°</option>
+              <option value="Auxiliar de 3°">Auxiliar de 3°</option>
+              <option value="Auxiliar de 4°">Auxiliar de 4°</option>
+              <option value="Auxiliar de 5°">Auxiliar de 5°</option>
+              <option value="Auxiliar de 6°">Auxiliar de 6°</option>
+              <option value="Oficial de Inteligencia">
+                Oficial de Inteligencia
+              </option>
+              <option value="Auxiliar de Inteligencia">
+                Auxiliar de Inteligencia
+              </option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label>Grupo</label>
+            <input type="text" class="input-grupo" readonly />
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script src="./js/calculadora.js"></script>
+  </body>
+</html>
