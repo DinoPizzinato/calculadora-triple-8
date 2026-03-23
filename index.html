@@ -97,9 +97,9 @@
               </div>
 
               <div class="campo">
-                <label for="cantidadFuncionarios"
-                  >Cantidad de funcionarios</label
-                >
+                <label for="cantidadFuncionarios">
+                  Cantidad de funcionarios
+                </label>
                 <select
                   id="cantidadFuncionarios"
                   name="cantidadFuncionarios"
@@ -115,6 +115,21 @@
                   <option value="8">8 funcionarios</option>
                   <option value="9">9 funcionarios</option>
                   <option value="10">10 funcionarios</option>
+                </select>
+              </div>
+
+              <div class="campo">
+                <label for="cantidadDetenidos">Cantidad de detenidos</label>
+                <select id="cantidadDetenidos" name="cantidadDetenidos">
+                  <option value="0">0 detenidos</option>
+                  <option value="1">1 detenido</option>
+                  <option value="2">2 detenidos</option>
+                  <option value="3">3 detenidos</option>
+                  <option value="4">4 detenidos</option>
+                  <option value="5">5 detenidos</option>
+                  <option value="6">6 detenidos</option>
+                  <option value="7">7 detenidos</option>
+                  <option value="8">8 detenidos</option>
                 </select>
               </div>
 
@@ -172,13 +187,15 @@
                 class="campo campo-completo bloque-pasajes oculto"
                 id="bloquePasajes"
               >
-                <h3 class="subseccion-titulo">Pasajes aéreos</h3>
+                <h3 class="subseccion-titulo">
+                  Pasajes aéreos para funcionarios
+                </h3>
 
                 <div class="grid-formulario">
                   <div class="campo">
-                    <label for="montoPasajesArs"
-                      >Monto total de pasajes (ARS)</label
-                    >
+                    <label for="montoPasajesArs">
+                      Monto total de pasajes de funcionarios (ARS)
+                    </label>
                     <input
                       type="number"
                       id="montoPasajesArs"
@@ -214,8 +231,44 @@
                       Abrir conversor de monedas de Aduana
                     </a>
                     <small class="ayuda">
-                      Los pasajes se cargan siempre en pesos argentinos y la
-                      calculadora los convierte a la moneda del destino.
+                      Los pasajes de funcionarios se cargan en pesos argentinos
+                      y la calculadora los convierte a la moneda del destino.
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="campo campo-completo bloque-pasajes oculto"
+                id="bloquePasajesDetenidos"
+              >
+                <h3 class="subseccion-titulo" id="tituloPasajesDetenidos">
+                  Pasaje aéreo para detenido
+                </h3>
+
+                <div class="grid-formulario">
+                  <div class="campo">
+                    <label
+                      for="montoPasajesDetenidosArs"
+                      id="labelPasajesDetenidos"
+                    >
+                      Monto total de pasaje para detenido (ARS)
+                    </label>
+                    <input
+                      type="number"
+                      id="montoPasajesDetenidosArs"
+                      name="montoPasajesDetenidosArs"
+                      min="0"
+                      step="0.01"
+                      placeholder="Ej: 800000"
+                    />
+                  </div>
+
+                  <div class="campo campo-completo">
+                    <small class="ayuda" id="ayudaPasajesDetenidos">
+                      Este importe corresponde exclusivamente al pasaje del
+                      detenido. Se muestra por separado y se suma al total
+                      general.
                     </small>
                   </div>
                 </div>

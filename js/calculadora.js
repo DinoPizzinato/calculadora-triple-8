@@ -288,6 +288,7 @@ const monedaDetectadaInput = document.getElementById("monedaDetectada");
 const cantidadFuncionariosSelect = document.getElementById(
   "cantidadFuncionarios",
 );
+const cantidadDetenidosSelect = document.getElementById("cantidadDetenidos");
 const contenedorFuncionarios = document.getElementById(
   "contenedorFuncionarios",
 );
@@ -295,14 +296,26 @@ const templateFuncionario = document.getElementById("templateFuncionario");
 const btnLimpiar = document.getElementById("btnLimpiar");
 const resultado = document.getElementById("resultado");
 const bloquePasajes = document.getElementById("bloquePasajes");
+const bloquePasajesDetenidos = document.getElementById(
+  "bloquePasajesDetenidos",
+);
 const montoPasajesArsInput = document.getElementById("montoPasajesArs");
+const montoPasajesDetenidosArsInput = document.getElementById(
+  "montoPasajesDetenidosArs",
+);
 const cotizacionMonedaInput = document.getElementById("cotizacionMoneda");
 const textoMonedaCotizacion = document.getElementById("textoMonedaCotizacion");
+const tituloPasajesDetenidos = document.getElementById(
+  "tituloPasajesDetenidos",
+);
+const labelPasajesDetenidos = document.getElementById("labelPasajesDetenidos");
+const ayudaPasajesDetenidos = document.getElementById("ayudaPasajesDetenidos");
 
 document.addEventListener("DOMContentLoaded", () => {
   sincronizarCantidadFuncionarios(Number(cantidadFuncionariosSelect.value));
   detectarZonaYMoneda();
   actualizarBloquePasajes();
+  actualizarBloquePasajesDetenidos();
 });
 
 paisInput.addEventListener("input", () => {
@@ -314,8 +327,15 @@ cantidadFuncionariosSelect.addEventListener("change", () => {
   sincronizarCantidadFuncionarios(Number(cantidadFuncionariosSelect.value));
 });
 
+cantidadDetenidosSelect.addEventListener("change", () => {
+  actualizarBloquePasajesDetenidos();
+});
+
 document.querySelectorAll('input[name="gastosErogar"]').forEach((checkbox) => {
-  checkbox.addEventListener("change", actualizarBloquePasajes);
+  checkbox.addEventListener("change", () => {
+    actualizarBloquePasajes();
+    actualizarBloquePasajesDetenidos();
+  });
 });
 
 btnLimpiar.addEventListener("click", () => {
@@ -326,8 +346,10 @@ btnLimpiar.addEventListener("click", () => {
   resultado.classList.add("oculto");
   resultado.innerHTML = "";
   cantidadFuncionariosSelect.value = "1";
+  cantidadDetenidosSelect.value = "0";
   sincronizarCantidadFuncionarios(1);
   actualizarBloquePasajes();
+  actualizarBloquePasajesDetenidos();
 });
 
 formulario.addEventListener("submit", (event) => {
@@ -425,6 +447,34 @@ function actualizarTextoCotizacion() {
   textoMonedaCotizacion.textContent = monedaDetectadaInput.value || "USD/EUR";
 }
 
+function obtenerCantidadDetenidos() {
+  return Number(cantidadDetenidosSelect.value) || 0;
+}
+
+function obtenerTextoDetenidos(cantidad) {
+  return cantidad === 1 ? "detenido" : "detenidos";
+}
+
+function actualizarBloquePasajesDetenidos() {
+  const mostrarPasajes = obtenerGastosSeleccionados().includes("pasajes");
+  const cantidadDetenidos = obtenerCantidadDetenidos();
+  const mostrar = mostrarPasajes && cantidadDetenidos > 0;
+  const texto = obtenerTextoDetenidos(cantidadDetenidos);
+
+  bloquePasajesDetenidos.classList.toggle("oculto", !mostrar);
+
+  tituloPasajesDetenidos.textContent = `Pasaje aéreo para ${texto}`;
+  labelPasajesDetenidos.textContent = `Monto total de pasaje para ${texto} (ARS)`;
+  ayudaPasajesDetenidos.textContent =
+    cantidadDetenidos === 1
+      ? "Este importe corresponde exclusivamente al pasaje del detenido. Se muestra por separado y se suma al total general."
+      : "Este importe corresponde exclusivamente a los pasajes de los detenidos. Se muestra por separado y se suma al total general.";
+
+  if (!mostrar) {
+    montoPasajesDetenidosArsInput.value = "";
+  }
+}
+
 function parsearHora(hora) {
   const [horas, minutos] = hora.split(":").map(Number);
   return horas * 60 + minutos;
@@ -506,6 +556,7 @@ function validarFormulario(zonaInfo) {
   const gastos = obtenerGastosSeleccionados();
   const selectsJerarquia =
     contenedorFuncionarios.querySelectorAll(".select-jerarquia");
+  const cantidadDetenidos = obtenerCantidadDetenidos();
 
   if (!paisInput.value.trim()) {
     return "Tenés que completar el país.";
@@ -536,11 +587,23 @@ function validarFormulario(zonaInfo) {
     const cotizacionMoneda = Number(cotizacionMonedaInput.value);
 
     if (!montoPasajesArs || montoPasajesArs <= 0) {
-      return "Tenés que ingresar el monto total de pasajes en pesos argentinos.";
+      return "Tenés que ingresar el monto total de pasajes de funcionarios en pesos argentinos.";
     }
 
     if (!cotizacionMoneda || cotizacionMoneda <= 0) {
       return "Tenés que ingresar la cotización para convertir los pasajes.";
+    }
+
+    if (cantidadDetenidos > 0) {
+      const montoPasajesDetenidosArs = Number(
+        montoPasajesDetenidosArsInput.value,
+      );
+
+      if (!montoPasajesDetenidosArs || montoPasajesDetenidosArs <= 0) {
+        return cantidadDetenidos === 1
+          ? "Tenés que ingresar el monto del pasaje del detenido en pesos argentinos."
+          : "Tenés que ingresar el monto total de pasajes de los detenidos en pesos argentinos.";
+      }
     }
   }
 
@@ -561,15 +624,12 @@ function formatearMontoArs(valor) {
   return `${valor.toFixed(2)} ARS`;
 }
 
-function calcularMontoPasajesConvertido() {
-  const montoPasajesArs = Number(montoPasajesArsInput.value) || 0;
-  const cotizacionMoneda = Number(cotizacionMonedaInput.value) || 0;
-
-  if (montoPasajesArs <= 0 || cotizacionMoneda <= 0) {
+function calcularMontoConvertidoDesdeArs(montoArs, cotizacionMoneda) {
+  if (montoArs <= 0 || cotizacionMoneda <= 0) {
     return 0;
   }
 
-  return montoPasajesArs / cotizacionMoneda;
+  return montoArs / cotizacionMoneda;
 }
 
 function calcularComision() {
@@ -590,6 +650,7 @@ function calcularComision() {
   const tarjetasFuncionarios = contenedorFuncionarios.querySelectorAll(
     ".tarjeta-funcionario",
   );
+  const cantidadDetenidos = obtenerCantidadDetenidos();
 
   const diasViaticos = calcularDiasViaticos(
     fechaInicio,
@@ -603,11 +664,29 @@ function calcularComision() {
     horaRegreso,
   );
   const diasCobertura = calcularDiasCobertura(fechaInicio, fechaRegreso);
-  const montoPasajesConvertido = gastos.includes("pasajes")
-    ? calcularMontoPasajesConvertido()
+
+  const montoPasajesFuncionariosArs = Number(montoPasajesArsInput.value) || 0;
+  const montoPasajesDetenidosArs =
+    Number(montoPasajesDetenidosArsInput.value) || 0;
+  const cotizacionMoneda = Number(cotizacionMonedaInput.value) || 0;
+
+  const montoPasajesFuncionariosConvertido = gastos.includes("pasajes")
+    ? calcularMontoConvertidoDesdeArs(
+        montoPasajesFuncionariosArs,
+        cotizacionMoneda,
+      )
     : 0;
 
-  let totalPasajes = 0;
+  const montoPasajesDetenidosConvertido =
+    gastos.includes("pasajes") && cantidadDetenidos > 0
+      ? calcularMontoConvertidoDesdeArs(
+          montoPasajesDetenidosArs,
+          cotizacionMoneda,
+        )
+      : 0;
+
+  let totalPasajesFuncionarios = 0;
+  let totalPasajesDetenidos = 0;
   let totalViaticos = 0;
   let totalAlojamiento = 0;
   let totalCoberturaMedica = 0;
@@ -666,11 +745,19 @@ function calcularComision() {
   });
 
   if (gastos.includes("pasajes")) {
-    totalPasajes = montoPasajesConvertido;
+    totalPasajesFuncionarios = montoPasajesFuncionariosConvertido;
+    totalPasajesDetenidos = montoPasajesDetenidosConvertido;
   }
 
   const totalGeneral =
-    totalPasajes + totalViaticos + totalAlojamiento + totalCoberturaMedica;
+    totalPasajesFuncionarios +
+    totalPasajesDetenidos +
+    totalViaticos +
+    totalAlojamiento +
+    totalCoberturaMedica;
+
+  const textoPasajesDetenidos =
+    cantidadDetenidos === 1 ? "Pasaje detenido" : "Pasajes detenidos";
 
   resultado.classList.remove("oculto");
   resultado.innerHTML = `
@@ -686,6 +773,7 @@ function calcularComision() {
       <p><strong>Noches de alojamiento:</strong> ${nochesAlojamiento}</p>
       <p><strong>Días de cobertura médica:</strong> ${diasCobertura}</p>
       <p><strong>Funcionarios:</strong> ${tarjetasFuncionarios.length}</p>
+      <p><strong>Detenidos:</strong> ${cantidadDetenidos}</p>
     </div>
 
     <h3>Detalle por funcionario</h3>
@@ -695,10 +783,15 @@ function calcularComision() {
 
     <div class="total-general">
       <h3>Totales generales</h3>
-      <p><strong>Total pasajes:</strong> ${
+      <p><strong>Total pasajes funcionarios:</strong> ${
         gastos.includes("pasajes")
-          ? `${formatearMonto(totalPasajes, zonaInfo.moneda)} <br><small>Convertido desde ${formatearMontoArs(Number(montoPasajesArsInput.value) || 0)} con cotización ${Number(cotizacionMonedaInput.value) || 0}</small>`
-          : formatearMonto(totalPasajes, zonaInfo.moneda)
+          ? `${formatearMonto(totalPasajesFuncionarios, zonaInfo.moneda)} <br><small>Convertido desde ${formatearMontoArs(montoPasajesFuncionariosArs)} con cotización ${cotizacionMoneda}</small>`
+          : formatearMonto(totalPasajesFuncionarios, zonaInfo.moneda)
+      }</p>
+      <p><strong>${textoPasajesDetenidos}:</strong> ${
+        gastos.includes("pasajes") && cantidadDetenidos > 0
+          ? `${formatearMonto(totalPasajesDetenidos, zonaInfo.moneda)} <br><small>Convertido desde ${formatearMontoArs(montoPasajesDetenidosArs)} con cotización ${cotizacionMoneda}</small>`
+          : formatearMonto(totalPasajesDetenidos, zonaInfo.moneda)
       }</p>
       <p><strong>Total viáticos:</strong> ${formatearMonto(totalViaticos, zonaInfo.moneda)}</p>
       <p><strong>Total alojamiento:</strong> ${formatearMonto(totalAlojamiento, zonaInfo.moneda)}</p>
