@@ -552,16 +552,22 @@ function calcularDiasViaticos(
 function calcularNochesAlojamiento(fechaInicioStr, fechaFinStr, horaRegreso) {
   const diasEntreFechas = diferenciaDiasCalendario(fechaInicioStr, fechaFinStr);
   const minutosRegreso = parsearHora(horaRegreso);
-  const diezAM = 10 * 60;
+  const seisAM = 6 * 60;
 
-  let noches = Math.max(diasEntreFechas, 1);
+  if (diasEntreFechas <= 0) {
+    return 0;
+  }
 
-  if (diasEntreFechas >= 1 && minutosRegreso < diezAM) {
+  let noches = diasEntreFechas;
+
+  // La última noche solo se reconoce si el regreso es después de las 06:00.
+  // Si vuelve a las 06:00 o antes, no corresponde esa última noche.
+  if (minutosRegreso <= seisAM) {
     noches -= 1;
   }
 
-  if (noches < 1) {
-    noches = 1;
+  if (noches < 0) {
+    noches = 0;
   }
 
   return noches;
